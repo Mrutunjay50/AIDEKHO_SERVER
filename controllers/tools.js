@@ -41,7 +41,7 @@ exports.getAiTools = async (req, res) => {
 
     if (search) {
       const searchRegex = new RegExp(search, 'i');
-      query = { ...query, $or: [{ category: searchRegex }] };
+      query = {...query, $or: [{ category: searchRegex },{ name: searchRegex }]};
       // Add more fields to search in if needed, here we're searching in 'name' and 'description'
     }
 
@@ -81,7 +81,7 @@ exports.getAiTools = async (req, res) => {
     }
 
 
-    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit))});
+    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit)), totalToolsCount});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -202,7 +202,7 @@ exports.getPlugins = async (req, res) => {
     }
     if (search) {
       const searchRegex = new RegExp(search, 'i');
-      query = { ...query, $or: [{ category: searchRegex }] };
+      query = {...query, $or: [{ category: searchRegex },{ name: searchRegex }]};
       // Add more fields to search in if needed, here we're searching in 'name' and 'description'
     }
 
@@ -239,7 +239,7 @@ exports.getPlugins = async (req, res) => {
         }
       }
     }
-    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit))});
+    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit)), totalToolsCount});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -279,7 +279,7 @@ exports.getGptTools = async (req, res) => {
     }
     if (search) {
       const searchRegex = new RegExp(search, 'i');
-      query = { ...query, $or: [{ category: searchRegex }] };
+      query = {...query, $or: [{ category: searchRegex },{ name: searchRegex }]};
       // Add more fields to search in if needed, here we're searching in 'name' and 'description'
     }
 
@@ -306,7 +306,7 @@ exports.getGptTools = async (req, res) => {
       };
     }
 
-    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit))});
+    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalToolsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalToolsCount / parseInt(limit)), totalToolsCount});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });

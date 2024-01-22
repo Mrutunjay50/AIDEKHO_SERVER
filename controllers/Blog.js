@@ -3,11 +3,10 @@ const { getSignedUrlFromS3 } = require('../utils/s3Utils');
 
 const { resizeImage, uploadToS3, generateFileName,deleteFromS3 } = require('../utils/s3Utils');
 
-
 const createBlog = async (req, res) => {
   try {
     const { buffer, originalname, mimetype } = req.file;
-    console.log(req.file);
+    // console.log(req.file);
 
     const resizedImageBuffer = await resizeImage(buffer);
     const fileName = generateFileName(originalname);
@@ -89,35 +88,45 @@ const updateBlog = async (req, res) => {
 
   const getAllBlogs = async (req, res) => {
     try {
-    //   let query = {};
-    // let result;
-      const blogs = await BlogModel.find();
-    //   if (page && limit) {
-    //     const pageNumber = parseInt(page);
-    //     const pageSize = parseInt(limit);
-    //     const startIndex = (pageNumber - 1) * pageSize;
-    //     const endIndex = pageNumber * pageSize;
+      const { page, limit, search } = req.query;
+      let query = {};
+      let result;
+      let totalBlogsCount;
+      let endIndex;
+
+      if (search) {
+        const searchRegex = new RegExp(search, 'i');
+        query = { ...query, $or: [{ category: searchRegex }] };
+        // Add more fields to search in if needed, here we're searching in 'name' and 'description'
+      }
+
+      if (page && limit) {
+        const pageNumber = parseInt(page);
+        const pageSize = parseInt(limit);
+        const startIndex = (pageNumber - 1) * pageSize;
+        endIndex = pageNumber * pageSize;
   
-    //     const totalToolsCount = await Tools.countDocuments(query);
-    //     if (endIndex < totalToolsCount) {
-    //       result = {
-    //         nextPage: pageNumber + 1,
-    //         data: await Tools.find(query).sort(sortOptions).limit(pageSize).skip(startIndex),
-    //       };
-    //     } else {
-    //       result = {
-    //         data: await Tools.find(query).sort(sortOptions).limit(pageSize).skip(startIndex),
-    //       };
-    //     }
-    //   } else {
-    //     result = {
-    //       data: await Tools.find(query).sort(sortOptions),
-    //     };
-    //   }
-    if (blogs.length > 0) {
-      for (const blog of blogs) {
+        totalBlogsCount = await BlogModel.countDocuments(query);
+        if (endIndex < totalBlogsCount) {
+          result = {
+            nextPage: pageNumber + 1,
+            data: await BlogModel.find(query).limit(pageSize).skip(startIndex),
+          };
+        } else {
+          result = {
+            data: await BlogModel.find(query).limit(pageSize).skip(startIndex),
+          };
+        }
+      } else {
+        result = {
+          data: await BlogModel.find(query),
+        };
+      }
+    
+    if (result.data.length > 0) {
+      for (const blog of result.data) {
         if (Array.isArray(blog.image)) {
-          blog.coverUrl = await Promise.all(blog.image.map(async (image) => {
+          blog.imageUrl = await Promise.all(blog.image.map(async (image) => {
             return await getSignedUrlFromS3(image);
           }));
         } else if (blog.image) {
@@ -125,13 +134,15 @@ const updateBlog = async (req, res) => {
         }
       }
     }
-    // console.log(blogs);
-      res.status(200).json(blogs);
-    } catch (error) {
+
+    res.status(200).json({result, currentPage : parseInt(page), hasLastPage : endIndex < totalBlogsCount, hasPreviousPage : parseInt(page) > 1, nextPage : parseInt(page) + 1, previousPage : parseInt(page) - 1, lastPage : Math.ceil(totalBlogsCount / parseInt(limit)), totalBlogsCount});
+  } catch (error) {
       console.error('Error getting all blogs:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   };
+
+
 
   const deleteBlog = async (req, res) => {
     try {
