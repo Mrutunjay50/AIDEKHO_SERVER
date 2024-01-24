@@ -9,6 +9,7 @@ const { imageMulter } = require('../multer/multerImg');
 
 // router.post('/csv',fileMulter, crudController.uploadcsv);
 router.get('/api/export-csv/:toolType', crudController.downloadCsv);
+router.get('/api/export-csv-users', crudController.downloadCsvUser);
 router.post('/api/addaitools/aiTool', isAdmin, imageMulter, crudController.addAiTools);
 router.post('/api/addaitools/gptTool', isAdmin, imageMulter, crudController.addGPTTools);
 router.post('/api/addaitools/pluginTool', isAdmin, imageMulter, crudController.addPluginTools);

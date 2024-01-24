@@ -43,7 +43,7 @@ const toolPluginSchema = new Schema({
         type: Number,
         default : 0,
         required: function () {
-          return this.inWhat === "premium";
+          return this.service === "Premium";
         },
     },  
 },{ timestamps: true });
