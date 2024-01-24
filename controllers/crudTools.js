@@ -63,11 +63,9 @@ const getToolModel = (tooltype) => {
 };
 
 exports.editAiTools = async (req, res, next) => {
-  console.log(req.query);
+
   try {
     const tool = await getToolModel(req.query.type).findById(req.query.id);
-
-    console.log(tool);
 
     if (!tool) {
       return res.status(404).json("Tool not found");
@@ -95,7 +93,6 @@ exports.editAiTools = async (req, res, next) => {
 
     res.status(201).json("Update successful");
   } catch (e) {
-    console.log(e);
     res.status(500).json(e.message);
   }
 };
@@ -130,6 +127,7 @@ exports.editAiTools = async (req, res, next) => {
 //     res.status(500).json({ message: err.message });
 //   }
 // };
+
 
 exports.downloadCsv = async (req, res) => {
   try {
@@ -171,6 +169,7 @@ exports.downloadCsv = async (req, res) => {
   }
 };
 
+
 exports.downloadCsvUser = async (req, res) => {
   try {
     let data; // Fetch all data from MongoDB, adjust the query as needed
@@ -195,6 +194,7 @@ exports.downloadCsvUser = async (req, res) => {
   }
 };
 
+
 exports.deleteAiTools = async (req, res, next) => {
   try {
     const tool = await getToolModel(req.query.type).findById(req.query.id);
@@ -211,6 +211,7 @@ exports.deleteAiTools = async (req, res, next) => {
   }
 };
 
+
 exports.addTopTag = async (req, res) => {
   try {
     const { toolId } = req.body; // Assuming you send the toolId from the frontend
@@ -224,38 +225,31 @@ exports.addTopTag = async (req, res) => {
     const hasTopTag = tool.tags.some((tag) => tag.tag === "top");
 
     if (hasTopTag) {
-      return res.json({ success: true, message: "Top tag already present" });
-    }
-
-    const currentDate = new Date().toISOString();
-    const newTag = { date: currentDate, tag: "top" };
-
-    // Add the new tag to the tool's featured array
-    tool.tags.push(newTag);
-
-    // Get all tools with the "top" tag, sorted by date (oldest first)
-    const topTools = await Tools.find({ "tags.tag": "top" }).sort(
-      "featured.date"
-    );
-
-    // If there are more than 50 tools with the "top" tag, remove the oldest one
-    if (topTools.length > 50) {
-      const oldestTopTool = topTools[0];
-      // Remove the oldest top tag
-      oldestTopTool.tags = oldestTopTool.tags.filter((t) => t.tag !== "top");
-      // Save the updated tool document
-      await oldestTopTool.save();
+      // If the "top" tag is present, remove it
+      tool.tags = tool.tags.filter((tag) => tag.tag !== "top");
+      res.json({ success: true, message: "Top tag removed successfully" });
+    } else {
+      // If the "top" tag is not present, add it
+      const currentDate = new Date().toISOString();
+      const newTag = { date: currentDate, tag: "top" };
+      tool.tags.push(newTag);
+      res.json({ success: true, message: "Top tag added successfully" });
     }
 
     // Save the updated tool document
     await tool.save();
 
-    res.json({ success: true, message: "Tag added successfully" });
+    // Optional: Perform additional logic if needed (e.g., removing old "top" tags)
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
+
 
 exports.addFeatureTag = async (req, res) => {
   try {
