@@ -277,7 +277,7 @@ sudo certbot renew --dry-run
 
 ## Screenshots
 
-![App Preview]()
+![App Preview](/homepage01.jpeg)
 
 
 
